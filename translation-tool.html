@@ -318,6 +318,43 @@
         .btn-option:hover .option-preview {
             color: #e8e8e8;
         }
+        .restore-prompt {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .restore-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        .restore-prompt h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .restore-prompt p {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        .restore-question {
+            font-weight: 600;
+            color: #333;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        .restore-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 25px;
+        }
+        .restore-buttons .btn {
+            flex: 1;
+            max-width: 250px;
+        }
     </style>
 </head>
 <body>
@@ -329,7 +366,7 @@
             </div>
             <div class="content">
                 <!-- Upload Section -->
-                <div v-if="!translationStarted" class="upload-section">
+                <div v-if="!translationStarted && !showRestorePrompt" class="upload-section">
                     <div class="file-input-group">
                         <label>📄 Archivo EN (Obligatorio):</label>
                         <input type="file" @change="handleEnFileUpload" accept=".txt" ref="enFileInput">
@@ -353,6 +390,24 @@
                     <button class="btn" @click="startTranslation" :disabled="!enFile">
                         Comenzar Traducción
                     </button>
+                </div>
+                <!-- Restore Progress Prompt -->
+                <div v-if="showRestorePrompt && !translationStarted" class="restore-prompt">
+                    <div class="restore-icon">💾</div>
+                    <h2>¡Progreso Guardado Encontrado!</h2>
+                    <p>Se encontró un progreso guardado anteriormente para <strong>{{ fileName }}_{{ targetLanguage }}</strong>.</p>
+                    <p class="restore-question">¿Qué deseas hacer?</p>
+                    <div class="restore-buttons">
+                        <button class="btn btn-success" @click="restoreSavedProgress">
+                            🔄 Continuar Traducción
+                        </button>
+                        <button class="btn btn-secondary" @click="startFresh">
+                            🆕 Empezar de Nuevo
+                        </button>
+                    </div>
+                    <div class="info-box" style="margin-top: 20px;">
+                        ℹ️ Si eliges "Continuar", se recuperará tu progreso anterior. Si eliges "Empezar de Nuevo", se borrará el progreso guardado.
+                    </div>
                 </div>
                 <!-- Translation Section -->
                 <div v-if="translationStarted && !isComplete" class="translation-section">
@@ -454,7 +509,9 @@
                     manualEdit: false,
                     errorMessage: '',
                     fileName: '',
-                    isComplete: false
+                    isComplete: false,
+                    hasSavedProgress: false,
+                    showRestorePrompt: false
                 }
             },
             computed: {
@@ -496,6 +553,20 @@
                     try {
                         const enContent = await this.readFile(this.enFile);
                         this.parseEnFile(enContent);
+                        // Verificar si hay progreso guardado ANTES de procesar el archivo de traducción
+                        this.hasSavedProgress = this.checkForSavedProgress();
+                        if (this.hasSavedProgress) {
+                            this.showRestorePrompt = true;
+                            return; // Esperar a que el usuario decida
+                        }
+                        // Si no hay progreso guardado, continuar normalmente
+                        await this.continueWithTranslation();
+                    } catch (error) {
+                        this.errorMessage = 'Error al procesar los archivos: ' + error.message;
+                    }
+                },
+                async continueWithTranslation() {
+                    try {
                         if (this.translationFile) {
                             const translationContent = await this.readFile(this.translationFile);
                             this.parseTranslationFile(translationContent);
@@ -505,6 +576,17 @@
                     } catch (error) {
                         this.errorMessage = 'Error al procesar los archivos: ' + error.message;
                     }
+                },
+                async restoreSavedProgress() {
+                    this.loadFromLocalStorage();
+                    this.showRestorePrompt = false;
+                    this.translationStarted = true;
+                    await this.generateSuggestion();
+                },
+                async startFresh() {
+                    this.clearLocalStorage();
+                    this.showRestorePrompt = false;
+                    await this.continueWithTranslation();
                 },
                 readFile(file) {
                     return new Promise((resolve, reject) => {
@@ -568,6 +650,54 @@
                     this.currentTranslation = this.suggestion;
                     this.manualEdit = false;
                 },
+                saveToLocalStorage() {
+                    // Guardar el estado completo en localStorage
+                    const state = {
+                        fileName: this.fileName,
+                        targetLanguage: this.targetLanguage,
+                        entries: this.entries,
+                        translations: this.translations,
+                        currentIndex: this.currentIndex,
+                        timestamp: new Date().toISOString()
+                    };
+                    const key = `pz-translation-${this.fileName}-${this.targetLanguage}`;
+                    localStorage.setItem(key, JSON.stringify(state));
+                    console.log('Progreso guardado automáticamente');
+                },
+                loadFromLocalStorage() {
+                    // Intentar cargar desde localStorage
+                    if (!this.fileName || !this.targetLanguage) return false;
+                    const key = `pz-translation-${this.fileName}-${this.targetLanguage}`;
+                    const saved = localStorage.getItem(key);
+                    if (saved) {
+                        try {
+                            const state = JSON.parse(saved);
+                            this.entries = state.entries;
+                            this.translations = state.translations;
+                            this.currentIndex = state.currentIndex;
+                            console.log('Progreso cargado desde localStorage');
+                            return true;
+                        } catch (error) {
+                            console.error('Error al cargar desde localStorage:', error);
+                            return false;
+                        }
+                    }
+                    return false;
+                },
+                clearLocalStorage() {
+                    // Limpiar localStorage para este archivo
+                    if (this.fileName && this.targetLanguage) {
+                        const key = `pz-translation-${this.fileName}-${this.targetLanguage}`;
+                        localStorage.removeItem(key);
+                        console.log('LocalStorage limpiado');
+                    }
+                },
+                checkForSavedProgress() {
+                    // Verificar si hay progreso guardado
+                    if (!this.fileName || !this.targetLanguage) return false;
+                    const key = `pz-translation-${this.fileName}-${this.targetLanguage}`;
+                    return localStorage.getItem(key) !== null;
+                },
                 async generateSuggestion() {
                     // Cargar la traducción del archivo si existe
                     const hasTranslation = this.loadCurrentTranslation();
@@ -619,12 +749,15 @@
                     }
                     // Guardar la traducción actual
                     this.translations[this.currentEntry.key] = this.currentTranslation;
+                    // Guardar en localStorage automáticamente
+                    this.saveToLocalStorage();
                     if (this.currentIndex < this.entries.length - 1) {
                         this.currentIndex++;
                         // generateSuggestion ahora maneja loadCurrentTranslation internamente
                         await this.generateSuggestion();
                     } else {
-                        // Completado
+                        // Completado - limpiar localStorage
+                        this.clearLocalStorage();
                         this.isComplete = true;
                     }
                 },
@@ -674,6 +807,8 @@
                     URL.revokeObjectURL(url);
                 },
                 resetApp() {
+                    // Limpiar localStorage antes de resetear
+                    this.clearLocalStorage();
                     this.enFile = null;
                     this.translationFile = null;
                     this.enFileName = '';
@@ -690,6 +825,8 @@
                     this.fileName = '';
                     this.isComplete = false;
                     this.manualEdit = false;
+                    this.hasSavedProgress = false;
+                    this.showRestorePrompt = false;
                     // Limpiar inputs de archivos
                     if (this.$refs.enFileInput) this.$refs.enFileInput.value = '';
                     if (this.$refs.translationFileInput) this.$refs.translationFileInput.value = '';
