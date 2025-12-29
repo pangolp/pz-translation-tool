@@ -271,6 +271,53 @@
             border-color: #764ba2;
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
+        .translation-options {
+            background: #fff8e1;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .options-header {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 15px;
+            font-size: 15px;
+            text-align: center;
+        }
+        .option-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .btn-option {
+            background: white;
+            border: 2px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #333;
+        }
+        .btn-option:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        .option-preview {
+            display: block;
+            font-weight: normal;
+            font-style: italic;
+            font-size: 13px;
+            margin-top: 8px;
+            color: #666;
+        }
+        .btn-option:hover .option-preview {
+            color: #e8e8e8;
+        }
     </style>
 </head>
 <body>
@@ -331,8 +378,24 @@
                                 placeholder="Escribe la traducción aquí o edita la sugerencia..."
                                 @input="manualEdit = true"
                             ></textarea>
-                            <div v-if="suggestion && !manualEdit" class="info-box" style="margin-top: 10px;">
+                            <div v-if="suggestion && !manualEdit && !originalFileTranslation" class="info-box" style="margin-top: 10px;">
                                 💡 Se ha sugerido una traducción automática. Puedes editarla o dejarla como está.
+                            </div>
+                        </div>
+                        <!-- Mostrar opciones cuando hay traducción del archivo Y sugerencia -->
+                        <div v-if="originalFileTranslation && suggestion" class="translation-options">
+                            <div class="options-header">
+                                🔄 Hay dos opciones disponibles. Selecciona cuál usar:
+                            </div>
+                            <div class="option-buttons">
+                                <button class="btn-option" @click="useFileTranslation">
+                                    📄 Usar del Archivo<br>
+                                    <span class="option-preview">"{{ originalFileTranslation }}"</span>
+                                </button>
+                                <button class="btn-option" @click="useSuggestedTranslation">
+                                    💡 Usar Sugerencia<br>
+                                    <span class="option-preview">"{{ suggestion }}"</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -386,6 +449,7 @@
                     currentIndex: 0,
                     currentTranslation: '',
                     suggestion: '',
+                    originalFileTranslation: '',
                     loadingSuggestion: false,
                     manualEdit: false,
                     errorMessage: '',
@@ -491,12 +555,26 @@
                     // Retornar si hay una traducción guardada (del archivo ES/AR)
                     return !!savedTranslation;
                 },
+                toTitleCase(text) {
+                    // Convertir a Title Case: Primera letra de cada palabra en mayúscula
+                    return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+                },
+                useFileTranslation() {
+                    this.currentTranslation = this.originalFileTranslation;
+                    this.manualEdit = false;
+                },
+                useSuggestedTranslation() {
+                    this.currentTranslation = this.suggestion;
+                    this.manualEdit = false;
+                },
                 async generateSuggestion() {
-                    // Si loadCurrentTranslation encontró una traducción guardada, no generar sugerencia
+                    // Cargar la traducción del archivo si existe
                     const hasTranslation = this.loadCurrentTranslation();
                     if (hasTranslation) {
-                        this.suggestion = '';
-                        return;
+                        this.originalFileTranslation = this.currentTranslation; // Guardar la del archivo
+                        // Ahora generar TAMBIÉN una sugerencia automática para comparar
+                    } else {
+                        this.originalFileTranslation = ''; // No hay traducción del archivo
                     }
                     this.loadingSuggestion = true;
                     this.suggestion = '';
@@ -508,19 +586,27 @@
                         const response = await fetch(url);
                         const data = await response.json();
                         if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
-                            this.suggestion = data.responseData.translatedText.trim();
-                            // PRE-LLENAR el textarea con la sugerencia
-                            this.currentTranslation = this.suggestion;
+                            // Aplicar Title Case a la traducción
+                            this.suggestion = this.toTitleCase(data.responseData.translatedText.trim());
+                            // Si NO hay traducción del archivo, pre-llenar con la sugerencia
+                            if (!hasTranslation) {
+                                this.currentTranslation = this.suggestion;
+                            }
+                            // Si SÍ hay traducción del archivo, dejar la del archivo y mostrar las opciones
                         } else {
-                            // Si falla, intentar con una traducción básica alternativa
-                            console.warn('No se pudo obtener traducción de MyMemory');
-                            this.suggestion = '';
-                            this.currentTranslation = '';
+                            // Si falla y no hay traducción del archivo
+                            if (!hasTranslation) {
+                                console.warn('No se pudo obtener traducción de MyMemory');
+                                this.suggestion = '';
+                                this.currentTranslation = '';
+                            }
                         }
                     } catch (error) {
                         console.error('Error al generar sugerencia:', error);
-                        this.suggestion = '';
-                        this.currentTranslation = '';
+                        if (!hasTranslation) {
+                            this.suggestion = '';
+                            this.currentTranslation = '';
+                        }
                     } finally {
                         this.loadingSuggestion = false;
                     }
@@ -598,6 +684,7 @@
                     this.currentIndex = 0;
                     this.currentTranslation = '';
                     this.suggestion = '';
+                    this.originalFileTranslation = '';
                     this.errorMessage = '';
                     this.fileName = '';
                     this.isComplete = false;
