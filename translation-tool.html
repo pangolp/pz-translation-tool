@@ -297,6 +297,27 @@
             margin-bottom: 20px;
             border: 1px solid #bee5eb;
         }
+
+        .language-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .language-select:hover {
+            border-color: #764ba2;
+        }
+
+        .language-select:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -317,9 +338,17 @@
                     </div>
 
                     <div class="file-input-group">
-                        <label>📄 Archivo ES (Opcional - para continuar traducción):</label>
-                        <input type="file" @change="handleEsFileUpload" accept=".txt" ref="esFileInput">
-                        <div v-if="esFileName" class="file-name">✓ {{ esFileName }}</div>
+                        <label>📄 Archivo ES/AR (Opcional - para continuar traducción):</label>
+                        <input type="file" @change="handleTranslationFileUpload" accept=".txt" ref="translationFileInput">
+                        <div v-if="translationFileName" class="file-name">✓ {{ translationFileName }}</div>
+                    </div>
+
+                    <div class="file-input-group">
+                        <label>🌍 Idioma de Destino:</label>
+                        <select v-model="targetLanguage" class="language-select">
+                            <option value="ES">ES - Español (España)</option>
+                            <option value="AR">AR - Español (Argentina)</option>
+                        </select>
                     </div>
 
                     <div v-if="errorMessage" class="error-message">
@@ -355,26 +384,12 @@
                             <label>🇪🇸 Traducción al Español:</label>
                             <textarea 
                                 v-model="currentTranslation" 
-                                placeholder="Escribe la traducción aquí..."
+                                placeholder="Escribe la traducción aquí o edita la sugerencia..."
                                 @input="manualEdit = true"
                             ></textarea>
-                        </div>
-
-                        <div v-if="suggestion && !manualEdit" class="suggestion-box">
-                            <div class="suggestion-label">💡 Sugerencia de traducción:</div>
-                            <div class="suggestion-text">{{ suggestion }}</div>
-                            <div class="suggestion-actions">
-                                <button class="btn btn-small btn-accept" @click="acceptSuggestion">
-                                    ✓ Aceptar
-                                </button>
-                                <button class="btn btn-small btn-reject" @click="rejectSuggestion">
-                                    ✗ Rechazar
-                                </button>
+                            <div v-if="suggestion && !manualEdit" class="info-box" style="margin-top: 10px;">
+                                💡 Se ha sugerido una traducción automática. Puedes editarla o dejarla como está.
                             </div>
-                        </div>
-
-                        <div v-if="manualEdit && suggestion" class="info-box">
-                            ℹ️ Has editado manualmente la traducción. Puedes continuar escribiendo o aceptar la sugerencia original.
                         </div>
                     </div>
 
@@ -424,9 +439,10 @@
             data() {
                 return {
                     enFile: null,
-                    esFile: null,
+                    translationFile: null,
                     enFileName: '',
-                    esFileName: '',
+                    translationFileName: '',
+                    targetLanguage: 'ES',
                     translationStarted: false,
                     entries: [],
                     translations: {},
@@ -458,11 +474,18 @@
                         this.errorMessage = '';
                     }
                 },
-                handleEsFileUpload(event) {
+                handleTranslationFileUpload(event) {
                     const file = event.target.files[0];
                     if (file) {
-                        this.esFile = file;
-                        this.esFileName = file.name;
+                        this.translationFile = file;
+                        this.translationFileName = file.name;
+                        
+                        // Detectar el idioma del archivo (ES o AR)
+                        if (file.name.includes('_AR')) {
+                            this.targetLanguage = 'AR';
+                        } else if (file.name.includes('_ES')) {
+                            this.targetLanguage = 'ES';
+                        }
                     }
                 },
                 async startTranslation() {
@@ -475,9 +498,9 @@
                         const enContent = await this.readFile(this.enFile);
                         this.parseEnFile(enContent);
 
-                        if (this.esFile) {
-                            const esContent = await this.readFile(this.esFile);
-                            this.parseEsFile(esContent);
+                        if (this.translationFile) {
+                            const translationContent = await this.readFile(this.translationFile);
+                            this.parseTranslationFile(translationContent);
                         }
 
                         this.translationStarted = true;
@@ -519,7 +542,7 @@
                         this.translations[entry.key] = '';
                     });
                 },
-                parseEsFile(content) {
+                parseTranslationFile(content) {
                     // Extraer las traducciones existentes
                     const regex = /(\w+)\s*=\s*"([^"]*)"/g;
                     let match;
@@ -539,7 +562,7 @@
                     this.manualEdit = false;
                 },
                 async generateSuggestion() {
-                    // Si ya hay una traducción, no generar sugerencia
+                    // Si ya hay una traducción guardada (del archivo ES/AR), usarla y no generar sugerencia
                     if (this.currentTranslation) {
                         this.suggestion = '';
                         return;
@@ -549,6 +572,10 @@
                     this.suggestion = '';
 
                     try {
+                        const dialectContext = this.targetLanguage === 'AR' 
+                            ? 'Usa español de Argentina (vos en lugar de tú, términos argentinos).' 
+                            : 'Usa español de España (tú, términos españoles).';
+
                         const response = await fetch('https://api.anthropic.com/v1/messages', {
                             method: 'POST',
                             headers: {
@@ -559,7 +586,7 @@
                                 max_tokens: 1000,
                                 messages: [{
                                     role: 'user',
-                                    content: `Traduce al español la siguiente frase de un videojuego. Responde ÚNICAMENTE con la traducción, sin explicaciones ni comillas adicionales.
+                                    content: `Traduce al español la siguiente frase de un videojuego. ${dialectContext} Responde ÚNICAMENTE con la traducción, sin explicaciones ni comillas adicionales.
 
 Frase en inglés: "${this.currentEntry.originalValue}"
 
@@ -574,6 +601,8 @@ Traducción al español:`
                         
                         if (data.content && data.content[0] && data.content[0].text) {
                             this.suggestion = data.content[0].text.trim().replace(/^["']|["']$/g, '');
+                            // PRE-LLENAR el textarea con la sugerencia
+                            this.currentTranslation = this.suggestion;
                         }
                     } catch (error) {
                         console.error('Error al generar sugerencia:', error);
@@ -581,13 +610,6 @@ Traducción al español:`
                     } finally {
                         this.loadingSuggestion = false;
                     }
-                },
-                acceptSuggestion() {
-                    this.currentTranslation = this.suggestion;
-                    this.manualEdit = false;
-                },
-                rejectSuggestion() {
-                    this.suggestion = '';
                 },
                 async nextEntry() {
                     if (!this.currentTranslation.trim()) {
@@ -626,7 +648,7 @@ Traducción al español:`
                     }
                 },
                 generateOutputContent() {
-                    let output = `${this.fileName}_ES = {\n`;
+                    let output = `${this.fileName}_${this.targetLanguage} = {\n`;
                     
                     this.entries.forEach((entry, index) => {
                         const translation = this.translations[entry.key] || '';
@@ -645,11 +667,11 @@ Traducción al español:`
                     }
 
                     const content = this.generateOutputContent();
-                    this.downloadFile(content, `${this.fileName}_ES_progreso.txt`);
+                    this.downloadFile(content, `${this.fileName}_${this.targetLanguage}_progreso.txt`);
                 },
                 downloadFinalFile() {
                     const content = this.generateOutputContent();
-                    this.downloadFile(content, `${this.fileName}_ES.txt`);
+                    this.downloadFile(content, `${this.fileName}_${this.targetLanguage}.txt`);
                 },
                 downloadFile(content, filename) {
                     const blob = new Blob([content], { type: 'text/plain' });
@@ -664,9 +686,10 @@ Traducción al español:`
                 },
                 resetApp() {
                     this.enFile = null;
-                    this.esFile = null;
+                    this.translationFile = null;
                     this.enFileName = '';
-                    this.esFileName = '';
+                    this.translationFileName = '';
+                    this.targetLanguage = 'ES';
                     this.translationStarted = false;
                     this.entries = [];
                     this.translations = {};
@@ -680,7 +703,7 @@ Traducción al español:`
                     
                     // Limpiar inputs de archivos
                     if (this.$refs.enFileInput) this.$refs.enFileInput.value = '';
-                    if (this.$refs.esFileInput) this.$refs.esFileInput.value = '';
+                    if (this.$refs.translationFileInput) this.$refs.translationFileInput.value = '';
                 }
             }
         }).mount('#app');
