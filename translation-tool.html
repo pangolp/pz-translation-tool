@@ -556,8 +556,9 @@
                     return !!savedTranslation;
                 },
                 toTitleCase(text) {
-                    // Convertir a Title Case: Primera letra de cada palabra en mayúscula
-                    return text.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+                    // Capitalizar solo la primera letra de la frase completa
+                    if (!text) return '';
+                    return text.charAt(0).toUpperCase() + text.slice(1).toLowerCase();
                 },
                 useFileTranslation() {
                     this.currentTranslation = this.originalFileTranslation;
