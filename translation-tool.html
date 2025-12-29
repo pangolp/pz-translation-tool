@@ -504,7 +504,6 @@
                         }
 
                         this.translationStarted = true;
-                        this.loadCurrentTranslation();
                         await this.generateSuggestion();
                     } catch (error) {
                         this.errorMessage = 'Error al procesar los archivos: ' + error.message;
@@ -558,12 +557,18 @@
                 },
                 loadCurrentTranslation() {
                     const entry = this.currentEntry;
-                    this.currentTranslation = this.translations[entry.key] || '';
+                    const savedTranslation = this.translations[entry.key] || '';
+                    this.currentTranslation = savedTranslation;
                     this.manualEdit = false;
+                    
+                    // Retornar si hay una traducción guardada (del archivo ES/AR)
+                    return !!savedTranslation;
                 },
                 async generateSuggestion() {
-                    // Si ya hay una traducción guardada (del archivo ES/AR), usarla y no generar sugerencia
-                    if (this.currentTranslation) {
+                    // Si loadCurrentTranslation encontró una traducción guardada, no generar sugerencia
+                    const hasTranslation = this.loadCurrentTranslation();
+                    
+                    if (hasTranslation) {
                         this.suggestion = '';
                         return;
                     }
@@ -572,41 +577,29 @@
                     this.suggestion = '';
 
                     try {
-                        const dialectContext = this.targetLanguage === 'AR' 
-                            ? 'Usa español de Argentina (vos en lugar de tú, términos argentinos).' 
-                            : 'Usa español de España (tú, términos españoles).';
-
-                        const response = await fetch('https://api.anthropic.com/v1/messages', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                model: 'claude-sonnet-4-20250514',
-                                max_tokens: 1000,
-                                messages: [{
-                                    role: 'user',
-                                    content: `Traduce al español la siguiente frase de un videojuego. ${dialectContext} Responde ÚNICAMENTE con la traducción, sin explicaciones ni comillas adicionales.
-
-Frase en inglés: "${this.currentEntry.originalValue}"
-
-Contexto: Esta es una clave de traducción de un videojuego. La clave es: ${this.currentEntry.key}
-
-Traducción al español:`
-                                }]
-                            })
-                        });
-
+                        const textToTranslate = this.currentEntry.originalValue;
+                        const targetLang = this.targetLanguage === 'AR' ? 'es' : 'es-ES';
+                        
+                        // MyMemory Translation API - Gratuita y sin CORS
+                        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|${targetLang}`;
+                        
+                        const response = await fetch(url);
                         const data = await response.json();
                         
-                        if (data.content && data.content[0] && data.content[0].text) {
-                            this.suggestion = data.content[0].text.trim().replace(/^["']|["']$/g, '');
+                        if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
+                            this.suggestion = data.responseData.translatedText.trim();
                             // PRE-LLENAR el textarea con la sugerencia
                             this.currentTranslation = this.suggestion;
+                        } else {
+                            // Si falla, intentar con una traducción básica alternativa
+                            console.warn('No se pudo obtener traducción de MyMemory');
+                            this.suggestion = '';
+                            this.currentTranslation = '';
                         }
                     } catch (error) {
                         console.error('Error al generar sugerencia:', error);
                         this.suggestion = '';
+                        this.currentTranslation = '';
                     } finally {
                         this.loadingSuggestion = false;
                     }
@@ -622,7 +615,7 @@ Traducción al español:`
 
                     if (this.currentIndex < this.entries.length - 1) {
                         this.currentIndex++;
-                        this.loadCurrentTranslation();
+                        // generateSuggestion ahora maneja loadCurrentTranslation internamente
                         await this.generateSuggestion();
                     } else {
                         // Completado
@@ -637,14 +630,8 @@ Traducción al español:`
                         }
 
                         this.currentIndex--;
-                        this.loadCurrentTranslation();
-                        
-                        // No generar sugerencia para entradas anteriores que ya tienen traducción
-                        if (!this.currentTranslation) {
-                            await this.generateSuggestion();
-                        } else {
-                            this.suggestion = '';
-                        }
+                        // generateSuggestion ahora maneja loadCurrentTranslation internamente
+                        await this.generateSuggestion();
                     }
                 },
                 generateOutputContent() {
