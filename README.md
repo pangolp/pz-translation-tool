@@ -15,6 +15,8 @@ Accede a la herramienta aquí: **[https://pangolp.github.io/pz-translation-tool/
 - ✅ **Title Case Automático**: Las traducciones siempre tienen la primera letra en mayúscula
 - ✅ **Dos Dialectos**: Soporte para español de España (ES) y Argentina (AR)
 - ✅ **Comparación de Traducciones**: Si subes un archivo parcialmente traducido, podrás comparar tu traducción con la sugerencia automática
+- ✅ **Guardado Automático**: Tu progreso se guarda automáticamente en el navegador (localStorage)
+- ✅ **Recuperación de Progreso**: Si cierras la pestaña, puedes continuar donde lo dejaste
 - ✅ **Navegación Intuitiva**: Ve una traducción a la vez con contador de progreso
 - ✅ **Sin Instalación**: Funciona 100% en el navegador
 - ✅ **Descarga de Progreso**: Guarda tu trabajo en cualquier momento
@@ -33,6 +35,11 @@ NombreArchivo_EN = {
     -- Comentarios
 }
 ```
+
+**⚠️ Importante:** El archivo debe comenzar con el nombre en el formato `NombreArchivo_EN = {` para que la herramienta pueda detectar correctamente el nombre del archivo. Por ejemplo:
+- ✅ `Attributes_EN = {` → Generará `Attributes_ES.txt`
+- ✅ `RecipeGroups_EN = {` → Generará `RecipeGroups_ES.txt`
+- ❌ `Items = {` → No se detectará correctamente
 
 ### 2. Proceso de Traducción
 
@@ -67,8 +74,26 @@ NombreArchivo_EN = {
 - **Contador de Progreso**: Ve cuántas traducciones llevas completadas (ej: "5 de 12")
 - **💾 Descargar Progreso**: Guarda tu trabajo en cualquier momento (genera un archivo `_progreso.txt`)
 - **Barra de Progreso**: Visual en la parte superior
+- **🔄 Guardado Automático**: Tu progreso se guarda automáticamente en el navegador cada vez que avanzas a la siguiente traducción
 
-### 4. Resultado Final
+### 4. Recuperación de Progreso (LocalStorage)
+
+La herramienta guarda automáticamente tu progreso en el navegador. Si cierras la pestaña accidentalmente o necesitas tomar un descanso:
+
+1. **Vuelve a abrir la herramienta**
+2. **Sube el mismo archivo EN**
+3. **Selecciona el mismo idioma** (ES o AR)
+4. **Aparecerá un mensaje**: "¡Progreso Guardado Encontrado!"
+5. **Elige una opción**:
+   - **🔄 Continuar Traducción**: Recupera tu progreso exactamente donde lo dejaste
+   - **🆕 Empezar de Nuevo**: Borra el progreso guardado y empieza desde cero
+
+**Nota importante**: El progreso se guarda por archivo y por idioma. Es decir, puedes tener guardados múltiples archivos simultáneamente:
+- `Attributes_ES` (guardado por separado)
+- `BodyParts_AR` (guardado por separado)
+- `Items_ES` (guardado por separado)
+
+### 5. Resultado Final
 
 El archivo generado tendrá este formato:
 
@@ -124,12 +149,15 @@ Attributes_AR = {
 
 - **Framework**: Vue.js 3
 - **API de Traducción**: MyMemory Translation API (gratuita, sin límites)
+- **Persistencia**: LocalStorage del navegador para guardado automático
 - **Formato de Salida**: 
   - Sangría de 4 espacios
   - Comas al final de cada línea
-  - Title Case automático (Primera Letra En Mayúscula)
-- **Compatibilidad**: Todos los navegadores modernos
+  - Solo primera letra en mayúscula (ej: "Hola como andas", no "Hola Como Andas")
+  - Nombres de archivo preservados correctamente (ej: `RecipeGroups_ES.txt`)
+- **Compatibilidad**: Todos los navegadores modernos (Chrome, Firefox, Safari, Edge)
 - **Sin Backend**: Todo funciona en el navegador
+- **Sin Dependencias Externas**: No requiere instalación ni configuración
 
 ## 📝 Ejemplos de Uso
 
@@ -171,25 +199,89 @@ Attributes_AR = {
 
 ## 💡 Tips y Mejores Prácticas
 
-1. **Guarda tu progreso frecuentemente**: Usa el botón "💾 Descargar Progreso" cada 10-20 traducciones
-2. **Revisa las sugerencias**: La traducción automática es buena, pero siempre revisa el contexto del juego
-3. **Usa archivos de progreso**: Si no puedes terminar en una sesión, descarga el progreso y continúa después
-4. **Mantén consistencia**: Si traduces varios archivos, usa el mismo dialecto (ES o AR)
-5. **Edita cuando sea necesario**: Las sugerencias son un punto de partida, ajústalas al contexto del juego
+1. **El guardado es automático**: No necesitas hacer nada especial, tu progreso se guarda automáticamente cada vez que avanzas
+2. **Usa el mismo navegador**: El progreso se guarda en el navegador que estás usando, así que usa siempre el mismo
+3. **No limpies el caché**: Si limpias los datos del navegador, perderás el progreso guardado
+4. **Descarga periódicamente**: Aunque hay guardado automático, es buena idea descargar el progreso cada cierto tiempo por seguridad
+5. **Revisa las sugerencias**: La traducción automática es buena, pero siempre revisa el contexto del juego
+6. **Mantén consistencia**: Si traduces varios archivos, usa el mismo dialecto (ES o AR)
+7. **Edita cuando sea necesario**: Las sugerencias son un punto de partida, ajústalas al contexto del juego
+
+## ❓ Preguntas Frecuentes (FAQ)
+
+### ¿Necesito instalar algo?
+No, la herramienta funciona 100% en el navegador. Solo necesitas acceder a la URL.
+
+### ¿Es gratis?
+Sí, completamente gratuita y sin límites de uso.
+
+### ¿Funciona sin internet?
+Necesitas internet para cargar la herramienta y para las sugerencias automáticas de traducción. El guardado en localStorage funciona offline.
+
+### ¿Puedo traducir varios archivos a la vez?
+No simultáneamente, pero puedes traducir un archivo, descargarlo, y luego empezar con otro. El progreso de cada archivo se guarda por separado.
+
+### ¿Qué pasa si el archivo tiene muchas entradas?
+No hay límite. Puedes traducir archivos con cientos o miles de entradas. El progreso se guarda automáticamente.
+
+### ¿Puedo usar esto para otros juegos?
+Sí, si usan el mismo formato de archivos Lua con estructura `NombreArchivo_EN = { clave = "valor" }`
+
+### ¿Las traducciones son perfectas?
+No, son sugerencias automáticas. Siempre debes revisarlas y editarlas según el contexto específico del juego.
+
+### ¿Puedo compartir mi progreso con otros?
+Sí, usa el botón "💾 Descargar Progreso" y comparte el archivo generado. Otros pueden subirlo como archivo ES/AR para continuar.
+
+### ¿Cómo borro mi progreso guardado?
+Cuando completas una traducción o eliges "Empezar de Nuevo", el progreso se borra automáticamente. También puedes limpiar los datos del navegador manualmente.
+
+### ¿Funciona en móvil?
+Sí, funciona en navegadores móviles, aunque la experiencia es mejor en desktop debido al tamaño de pantalla.
 
 ## 🐛 Solución de Problemas
 
 ### La traducción no aparece en el campo de texto
 - Verifica que el archivo EN esté correctamente formateado
 - Asegúrate de tener conexión a internet (necesaria para las sugerencias)
+- Abre la consola del navegador (F12) para ver si hay errores
+
+### El archivo descargado tiene un nombre incorrecto (ejemplo: "_ES.txt")
+- Asegúrate de que el archivo EN comience con `NombreArchivo_EN = {`
+- Verifica que no haya espacios o caracteres especiales al inicio del archivo
+- El formato debe ser exactamente: `Attributes_EN = {` (sin espacios antes)
 
 ### El archivo descargado no tiene el formato correcto
 - Verifica que el archivo EN original tenga el formato correcto de Lua
 - Asegúrate de completar todas las traducciones antes de descargar
+- Revisa que las comillas estén correctamente cerradas en el archivo original
 
 ### No puedo continuar una traducción
 - Verifica que el archivo ES/AR tenga el mismo formato que el EN
 - Asegúrate de que las claves coincidan entre ambos archivos
+- El archivo ES/AR debe comenzar con `NombreArchivo_ES = {` o `NombreArchivo_AR = {`
+
+### No aparece el mensaje de "Progreso Guardado"
+- Asegúrate de usar el mismo navegador
+- Verifica que el nombre del archivo y el idioma sean exactamente los mismos
+- Comprueba que las cookies/localStorage estén habilitadas en tu navegador
+- Revisa la consola del navegador (F12) para ver si hay errores
+
+### Perdí mi progreso
+- Si limpiaste el caché del navegador, el progreso guardado se habrá eliminado
+- Usa el botón "💾 Descargar Progreso" regularmente como respaldo
+- Considera usar el modo incógnito solo si NO quieres guardar el progreso
+- El progreso se guarda por archivo + idioma, no globalmente
+
+### La capitalización no es correcta
+- La herramienta capitaliza solo la primera letra de cada traducción
+- Ejemplo correcto: "Hola como andas" (no "Hola Como Andas")
+- Si necesitas mayúsculas en medio de la frase, edita manualmente la traducción
+
+### Las traducciones automáticas no son precisas
+- MyMemory es una API de traducción general, no específica de videojuegos
+- Siempre revisa y edita las traducciones según el contexto del juego
+- Puedes escribir tu propia traducción desde cero si la sugerencia no es adecuada
 
 ## 📄 Licencia
 
@@ -224,3 +316,22 @@ Si encuentras algún bug o tienes sugerencias, por favor abre un [Issue](https:/
 ---
 
 ⭐ Si esta herramienta te resulta útil, considera darle una estrella en GitHub!
+
+## 📋 Changelog
+
+### Versión 1.0.0 (Diciembre 2024)
+- ✅ Traducción automática con MyMemory API
+- ✅ Guardado automático en localStorage
+- ✅ Recuperación de progreso
+- ✅ Soporte para español de España (ES) y Argentina (AR)
+- ✅ Comparación entre traducción existente y sugerencia
+- ✅ Capitalización correcta (solo primera letra)
+- ✅ Navegación intuitiva con contador de progreso
+- ✅ Descarga manual de progreso
+- ✅ Validaciones y manejo de errores mejorado
+
+### Correcciones
+- 🐛 Corregido bug donde el nombre del archivo no se guardaba en localStorage
+- 🐛 Corregido formato de capitalización (ahora solo primera letra en mayúscula)
+- 🐛 Agregado fallback para detectar nombre de archivo desde el nombre del archivo subido
+- 🐛 Validaciones adicionales para evitar archivos sin nombre
