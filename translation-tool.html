@@ -11,68 +11,56 @@
             padding: 0;
             box-sizing: border-box;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
         #app {
             max-width: 900px;
             margin: 0 auto;
         }
-
         .container {
             background: white;
             border-radius: 15px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.2);
             overflow: hidden;
         }
-
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 30px;
             text-align: center;
         }
-
         .header h1 {
             font-size: 28px;
             margin-bottom: 10px;
         }
-
         .header p {
             opacity: 0.9;
             font-size: 14px;
         }
-
         .content {
             padding: 30px;
         }
-
         .upload-section {
             margin-bottom: 30px;
         }
-
         .file-input-group {
             margin-bottom: 20px;
         }
-
         .file-input-group label {
             display: block;
             font-weight: 600;
             margin-bottom: 8px;
             color: #333;
         }
-
         .file-input-wrapper {
             position: relative;
             display: inline-block;
             width: 100%;
         }
-
         input[type="file"] {
             width: 100%;
             padding: 12px;
@@ -82,19 +70,16 @@
             background: #f8f9ff;
             transition: all 0.3s;
         }
-
         input[type="file"]:hover {
             border-color: #764ba2;
             background: #f0f1ff;
         }
-
         .file-name {
             margin-top: 8px;
             font-size: 13px;
             color: #666;
             font-style: italic;
         }
-
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -106,31 +91,25 @@
             font-weight: 600;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
-
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
-
         .btn-secondary {
             background: #6c757d;
             margin-left: 10px;
         }
-
         .btn-success {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
         }
-
         .translation-section {
             margin-top: 30px;
         }
-
         .progress-bar {
             background: #e9ecef;
             height: 8px;
@@ -138,13 +117,11 @@
             overflow: hidden;
             margin-bottom: 20px;
         }
-
         .progress-fill {
             background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
             height: 100%;
             transition: width 0.3s;
         }
-
         .progress-text {
             text-align: center;
             font-weight: 600;
@@ -152,18 +129,15 @@
             margin-bottom: 20px;
             font-size: 18px;
         }
-
         .translation-card {
             background: #f8f9ff;
             border-radius: 10px;
             padding: 25px;
             margin-bottom: 20px;
         }
-
         .translation-field {
             margin-bottom: 20px;
         }
-
         .translation-field label {
             display: block;
             font-weight: 600;
@@ -171,7 +145,6 @@
             color: #333;
             font-size: 14px;
         }
-
         .translation-field .key-value {
             background: white;
             padding: 12px;
@@ -180,7 +153,6 @@
             font-family: 'Courier New', monospace;
             color: #495057;
         }
-
         .translation-field textarea {
             width: 100%;
             padding: 12px;
@@ -192,12 +164,10 @@
             font-family: inherit;
             transition: border-color 0.3s;
         }
-
         .translation-field textarea:focus {
             outline: none;
             border-color: #667eea;
         }
-
         .suggestion-box {
             background: #fff3cd;
             border: 1px solid #ffc107;
@@ -205,14 +175,12 @@
             padding: 12px;
             margin-top: 10px;
         }
-
         .suggestion-box .suggestion-label {
             font-size: 13px;
             color: #856404;
             margin-bottom: 8px;
             font-weight: 600;
         }
-
         .suggestion-text {
             background: white;
             padding: 10px;
@@ -221,38 +189,31 @@
             color: #495057;
             margin-bottom: 10px;
         }
-
         .suggestion-actions {
             display: flex;
             gap: 10px;
         }
-
         .btn-small {
             padding: 6px 15px;
             font-size: 13px;
         }
-
         .btn-accept {
             background: #28a745;
         }
-
         .btn-reject {
             background: #dc3545;
         }
-
         .navigation-buttons {
             display: flex;
             justify-content: space-between;
             margin-top: 25px;
         }
-
         .loading {
             text-align: center;
             padding: 20px;
             color: #667eea;
             font-style: italic;
         }
-
         .spinner {
             border: 3px solid #f3f3f3;
             border-top: 3px solid #667eea;
@@ -262,12 +223,10 @@
             animation: spin 1s linear infinite;
             margin: 20px auto;
         }
-
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
         .complete-message {
             text-align: center;
             padding: 40px;
@@ -275,11 +234,9 @@
             border-radius: 10px;
             color: #155724;
         }
-
         .complete-message h2 {
             margin-bottom: 20px;
         }
-
         .error-message {
             background: #f8d7da;
             color: #721c24;
@@ -288,7 +245,6 @@
             margin-bottom: 20px;
             border: 1px solid #f5c6cb;
         }
-
         .info-box {
             background: #d1ecf1;
             color: #0c5460;
@@ -297,7 +253,6 @@
             margin-bottom: 20px;
             border: 1px solid #bee5eb;
         }
-
         .language-select {
             width: 100%;
             padding: 12px;
@@ -308,11 +263,9 @@
             cursor: pointer;
             transition: all 0.3s;
         }
-
         .language-select:hover {
             border-color: #764ba2;
         }
-
         .language-select:focus {
             outline: none;
             border-color: #764ba2;
@@ -327,7 +280,6 @@
                 <h1>🎮 Game Translation Tool</h1>
                 <p>Herramienta para traducir archivos de juego al español</p>
             </div>
-
             <div class="content">
                 <!-- Upload Section -->
                 <div v-if="!translationStarted" class="upload-section">
@@ -336,13 +288,11 @@
                         <input type="file" @change="handleEnFileUpload" accept=".txt" ref="enFileInput">
                         <div v-if="enFileName" class="file-name">✓ {{ enFileName }}</div>
                     </div>
-
                     <div class="file-input-group">
                         <label>📄 Archivo ES/AR (Opcional - para continuar traducción):</label>
                         <input type="file" @change="handleTranslationFileUpload" accept=".txt" ref="translationFileInput">
                         <div v-if="translationFileName" class="file-name">✓ {{ translationFileName }}</div>
                     </div>
-
                     <div class="file-input-group">
                         <label>🌍 Idioma de Destino:</label>
                         <select v-model="targetLanguage" class="language-select">
@@ -350,16 +300,13 @@
                             <option value="AR">AR - Español (Argentina)</option>
                         </select>
                     </div>
-
                     <div v-if="errorMessage" class="error-message">
                         {{ errorMessage }}
                     </div>
-
                     <button class="btn" @click="startTranslation" :disabled="!enFile">
                         Comenzar Traducción
                     </button>
                 </div>
-
                 <!-- Translation Section -->
                 <div v-if="translationStarted && !isComplete" class="translation-section">
                     <div class="progress-bar">
@@ -368,18 +315,15 @@
                     <div class="progress-text">
                         {{ currentIndex + 1 }} de {{ entries.length }} traducciones
                     </div>
-
                     <div v-if="!loadingSuggestion" class="translation-card">
                         <div class="translation-field">
                             <label>🔑 Clave:</label>
                             <div class="key-value">{{ currentEntry.key }}</div>
                         </div>
-
                         <div class="translation-field">
                             <label>🇬🇧 Texto Original (EN):</label>
                             <div class="key-value">{{ currentEntry.originalValue }}</div>
                         </div>
-
                         <div class="translation-field">
                             <label>🇪🇸 Traducción al Español:</label>
                             <textarea 
@@ -392,21 +336,17 @@
                             </div>
                         </div>
                     </div>
-
                     <div v-if="loadingSuggestion" class="loading">
                         <div class="spinner"></div>
                         <p>Generando sugerencia de traducción...</p>
                     </div>
-
                     <div class="navigation-buttons">
                         <button class="btn btn-secondary" @click="previousEntry" :disabled="currentIndex === 0">
                             ← Anterior
                         </button>
-                        
                         <button class="btn btn-secondary" @click="downloadProgress">
                             💾 Descargar Progreso
                         </button>
-                        
                         <button 
                             class="btn" 
                             @click="nextEntry" 
@@ -416,7 +356,6 @@
                         </button>
                     </div>
                 </div>
-
                 <!-- Complete Section -->
                 <div v-if="isComplete" class="complete-message">
                     <h2>🎉 ¡Traducción Completada!</h2>
@@ -431,10 +370,8 @@
             </div>
         </div>
     </div>
-
     <script>
         const { createApp } = Vue;
-
         createApp({
             data() {
                 return {
@@ -479,7 +416,6 @@
                     if (file) {
                         this.translationFile = file;
                         this.translationFileName = file.name;
-                        
                         // Detectar el idioma del archivo (ES o AR)
                         if (file.name.includes('_AR')) {
                             this.targetLanguage = 'AR';
@@ -493,16 +429,13 @@
                         this.errorMessage = 'Por favor, selecciona un archivo EN';
                         return;
                     }
-
                     try {
                         const enContent = await this.readFile(this.enFile);
                         this.parseEnFile(enContent);
-
                         if (this.translationFile) {
                             const translationContent = await this.readFile(this.translationFile);
                             this.parseTranslationFile(translationContent);
                         }
-
                         this.translationStarted = true;
                         await this.generateSuggestion();
                     } catch (error) {
@@ -523,19 +456,16 @@
                     if (match) {
                         this.fileName = match[1];
                     }
-
                     // Extraer todas las entradas clave = "valor"
                     const regex = /(\w+)\s*=\s*"([^"]*)"/g;
                     let matchResult;
                     this.entries = [];
-
                     while ((matchResult = regex.exec(content)) !== null) {
                         this.entries.push({
                             key: matchResult[1],
                             originalValue: matchResult[2]
                         });
                     }
-
                     // Inicializar traducciones vacías
                     this.entries.forEach(entry => {
                         this.translations[entry.key] = '';
@@ -545,11 +475,9 @@
                     // Extraer las traducciones existentes
                     const regex = /(\w+)\s*=\s*"([^"]*)"/g;
                     let match;
-
                     while ((match = regex.exec(content)) !== null) {
                         const key = match[1];
                         const value = match[2];
-                        
                         if (this.translations.hasOwnProperty(key)) {
                             this.translations[key] = value;
                         }
@@ -560,32 +488,25 @@
                     const savedTranslation = this.translations[entry.key] || '';
                     this.currentTranslation = savedTranslation;
                     this.manualEdit = false;
-                    
                     // Retornar si hay una traducción guardada (del archivo ES/AR)
                     return !!savedTranslation;
                 },
                 async generateSuggestion() {
                     // Si loadCurrentTranslation encontró una traducción guardada, no generar sugerencia
                     const hasTranslation = this.loadCurrentTranslation();
-                    
                     if (hasTranslation) {
                         this.suggestion = '';
                         return;
                     }
-
                     this.loadingSuggestion = true;
                     this.suggestion = '';
-
                     try {
                         const textToTranslate = this.currentEntry.originalValue;
                         const targetLang = this.targetLanguage === 'AR' ? 'es' : 'es-ES';
-                        
                         // MyMemory Translation API - Gratuita y sin CORS
                         const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|${targetLang}`;
-                        
                         const response = await fetch(url);
                         const data = await response.json();
-                        
                         if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
                             this.suggestion = data.responseData.translatedText.trim();
                             // PRE-LLENAR el textarea con la sugerencia
@@ -609,10 +530,8 @@
                         alert('Por favor, ingresa una traducción antes de continuar');
                         return;
                     }
-
                     // Guardar la traducción actual
                     this.translations[this.currentEntry.key] = this.currentTranslation;
-
                     if (this.currentIndex < this.entries.length - 1) {
                         this.currentIndex++;
                         // generateSuggestion ahora maneja loadCurrentTranslation internamente
@@ -628,7 +547,6 @@
                         if (this.currentTranslation.trim()) {
                             this.translations[this.currentEntry.key] = this.currentTranslation;
                         }
-
                         this.currentIndex--;
                         // generateSuggestion ahora maneja loadCurrentTranslation internamente
                         await this.generateSuggestion();
@@ -636,14 +554,12 @@
                 },
                 generateOutputContent() {
                     let output = `${this.fileName}_${this.targetLanguage} = {\n`;
-                    
                     this.entries.forEach((entry, index) => {
                         const translation = this.translations[entry.key] || '';
                         if (translation) {
                             output += `    ${entry.key} = "${translation}",\n`;
                         }
                     });
-                    
                     output += '}\n';
                     return output;
                 },
@@ -652,7 +568,6 @@
                     if (this.currentTranslation.trim()) {
                         this.translations[this.currentEntry.key] = this.currentTranslation;
                     }
-
                     const content = this.generateOutputContent();
                     this.downloadFile(content, `${this.fileName}_${this.targetLanguage}_progreso.txt`);
                 },
@@ -687,7 +602,6 @@
                     this.fileName = '';
                     this.isComplete = false;
                     this.manualEdit = false;
-                    
                     // Limpiar inputs de archivos
                     if (this.$refs.enFileInput) this.$refs.enFileInput.value = '';
                     if (this.$refs.translationFileInput) this.$refs.translationFileInput.value = '';
