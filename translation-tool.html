@@ -601,6 +601,22 @@
                     const match = content.match(/^(\w+)_EN\s*=/);
                     if (match) {
                         this.fileName = match[1];
+                        console.log('Nombre de archivo detectado:', this.fileName);
+                    } else {
+                        // Fallback: intentar obtener del nombre del archivo subido
+                        if (this.enFileName) {
+                            const fileNameMatch = this.enFileName.match(/^(\w+)_EN/);
+                            if (fileNameMatch) {
+                                this.fileName = fileNameMatch[1];
+                                console.log('Nombre de archivo extraído del nombre del archivo:', this.fileName);
+                            } else {
+                                this.errorMessage = 'No se pudo detectar el nombre del archivo. Asegúrate de que el formato sea correcto (NombreArchivo_EN = {...})';
+                                return;
+                            }
+                        } else {
+                            this.errorMessage = 'No se pudo detectar el nombre del archivo. Asegúrate de que el formato sea correcto (NombreArchivo_EN = {...})';
+                            return;
+                        }
                     }
                     // Extraer todas las entradas clave = "valor"
                     const regex = /(\w+)\s*=\s*"([^"]*)"/g;
@@ -616,6 +632,7 @@
                     this.entries.forEach(entry => {
                         this.translations[entry.key] = '';
                     });
+                    console.log(`Se encontraron ${this.entries.length} entradas para traducir`);
                 },
                 parseTranslationFile(content) {
                     // Extraer las traducciones existentes
@@ -672,6 +689,7 @@
                     if (saved) {
                         try {
                             const state = JSON.parse(saved);
+                            this.fileName = state.fileName; // ¡IMPORTANTE! Recuperar el fileName
                             this.entries = state.entries;
                             this.translations = state.translations;
                             this.currentIndex = state.currentIndex;
@@ -773,6 +791,12 @@
                     }
                 },
                 generateOutputContent() {
+                    // Validar que fileName no esté vacío
+                    if (!this.fileName) {
+                        console.error('Error: fileName está vacío');
+                        alert('Error: No se pudo determinar el nombre del archivo. Por favor, recarga la página y vuelve a intentarlo.');
+                        return '';
+                    }
                     let output = `${this.fileName}_${this.targetLanguage} = {\n`;
                     this.entries.forEach((entry, index) => {
                         const translation = this.translations[entry.key] || '';
