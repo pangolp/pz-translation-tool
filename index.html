@@ -355,22 +355,6 @@
             flex: 1;
             max-width: 250px;
         }
-        .btn-regenerate {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-            width: 100%;
-        }
-        .btn-regenerate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
-        }
     </style>
 </head>
 <body>
@@ -452,14 +436,13 @@
                             <div v-if="suggestion && !manualEdit && !originalFileTranslation" class="info-box" style="margin-top: 10px;">
                                 💡 Se ha sugerido una traducción automática. Puedes editarla o dejarla como está.
                             </div>
-                            <!-- Botón para regenerar sugerencia si el campo está vacío -->
-                            <div v-if="!currentTranslation.trim() && !loadingSuggestion" style="margin-top: 10px;">
-                                <button class="btn btn-regenerate" @click="regenerateSuggestion">
-                                    🔄 Generar Sugerencia
-                                </button>
-                                <p style="font-size: 13px; color: #666; margin-top: 8px; font-style: italic;">
-                                    Si no aparece ninguna traducción, haz click aquí para generar una sugerencia.
-                                </p>
+                            <!-- Mensaje de límite de API alcanzado -->
+                            <div v-if="apiLimitReached" class="error-message" style="margin-top: 10px;">
+                                <strong>⏱️ Límite de API Alcanzado</strong><br>
+                                {{ apiLimitMessage }}<br>
+                                <span style="font-size: 13px; margin-top: 5px; display: block;">
+                                    Puedes escribir la traducción manualmente o esperar y continuar más tarde.
+                                </span>
                             </div>
                         </div>
                         <!-- Mostrar opciones cuando hay traducción del archivo Y sugerencia -->
@@ -536,7 +519,9 @@
                     fileName: '',
                     isComplete: false,
                     hasSavedProgress: false,
-                    showRestorePrompt: false
+                    showRestorePrompt: false,
+                    apiLimitReached: false,
+                    apiLimitMessage: ''
                 }
             },
             computed: {
@@ -692,33 +677,6 @@
                     this.currentTranslation = this.suggestion;
                     this.manualEdit = false;
                 },
-                async regenerateSuggestion() {
-                    // Forzar la regeneración de la sugerencia
-                    this.loadingSuggestion = true;
-                    this.suggestion = '';
-                    this.originalFileTranslation = '';
-                    try {
-                        const textToTranslate = this.currentEntry.originalValue;
-                        const targetLang = this.targetLanguage === 'AR' ? 'es' : 'es-ES';
-                        // MyMemory Translation API - Gratuita y sin CORS
-                        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|${targetLang}`;
-                        const response = await fetch(url);
-                        const data = await response.json();
-                        if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
-                            // Aplicar Title Case a la traducción
-                            this.suggestion = this.toTitleCase(data.responseData.translatedText.trim());
-                            this.currentTranslation = this.suggestion;
-                            this.manualEdit = false;
-                        } else {
-                            alert('No se pudo generar una sugerencia. Por favor, intenta de nuevo o escribe la traducción manualmente.');
-                        }
-                    } catch (error) {
-                        console.error('Error al generar sugerencia:', error);
-                        alert('Error al conectar con el servicio de traducción. Verifica tu conexión a internet.');
-                    } finally {
-                        this.loadingSuggestion = false;
-                    }
-                },
                 saveToLocalStorage() {
                     // Guardar el estado completo en localStorage
                     const state = {
@@ -779,6 +737,8 @@
                     }
                     this.loadingSuggestion = true;
                     this.suggestion = '';
+                    this.apiLimitReached = false;
+                    this.apiLimitMessage = '';
                     try {
                         const textToTranslate = this.currentEntry.originalValue;
                         const targetLang = this.targetLanguage === 'AR' ? 'es' : 'es-ES';
@@ -786,6 +746,24 @@
                         const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|${targetLang}`;
                         const response = await fetch(url);
                         const data = await response.json();
+                        // Detectar error 429 (Rate Limit)
+                        if (response.status === 429 || data.responseStatus === 429) {
+                            this.apiLimitReached = true;
+                            // Intentar extraer el mensaje de la respuesta
+                            if (data.responseDetails) {
+                                this.apiLimitMessage = data.responseDetails;
+                            } else if (data.error) {
+                                this.apiLimitMessage = data.error.message || 'Se alcanzó el límite de uso de la API. Por favor, espera unos minutos.';
+                            } else {
+                                this.apiLimitMessage = 'Se alcanzó el límite de uso de la API de traducción. Por favor, espera unos minutos antes de continuar.';
+                            }
+                            console.warn('API Rate Limit alcanzado:', data);
+                            // Si NO hay traducción del archivo, dejar el campo vacío para traducción manual
+                            if (!hasTranslation) {
+                                this.currentTranslation = '';
+                            }
+                            return;
+                        }
                         if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
                             // Aplicar Title Case a la traducción
                             this.suggestion = this.toTitleCase(data.responseData.translatedText.trim());
@@ -804,6 +782,11 @@
                         }
                     } catch (error) {
                         console.error('Error al generar sugerencia:', error);
+                        // Verificar si el error es de red o rate limit
+                        if (error.message && error.message.includes('429')) {
+                            this.apiLimitReached = true;
+                            this.apiLimitMessage = 'Se alcanzó el límite de uso de la API. Por favor, espera unos minutos.';
+                        }
                         if (!hasTranslation) {
                             this.suggestion = '';
                             this.currentTranslation = '';
@@ -903,6 +886,8 @@
                     this.manualEdit = false;
                     this.hasSavedProgress = false;
                     this.showRestorePrompt = false;
+                    this.apiLimitReached = false;
+                    this.apiLimitMessage = '';
                     // Limpiar inputs de archivos
                     if (this.$refs.enFileInput) this.$refs.enFileInput.value = '';
                     if (this.$refs.translationFileInput) this.$refs.translationFileInput.value = '';

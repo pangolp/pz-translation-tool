@@ -12,8 +12,8 @@ Accede a la herramienta aquí: **[https://pangolp.github.io/pz-translation-tool/
 ## ✨ Características
 
 - ✅ **Traducción Automática**: Sugerencias automáticas usando MyMemory Translation API
-- ✅ **Regenerar Sugerencia**: Botón manual para generar traducción si no carga automáticamente
-- ✅ **Title Case Automático**: Las traducciones siempre tienen la primera letra en mayúscula
+- ✅ **Detección de Límite de API**: Notifica cuando se alcanza el límite de uso y sugiere traducción manual
+- ✅ **Capitalización Correcta**: Las traducciones siempre tienen solo la primera letra en mayúscula
 - ✅ **Dos Dialectos**: Soporte para español de España (ES) y Argentina (AR)
 - ✅ **Comparación de Traducciones**: Si subes un archivo parcialmente traducido, podrás comparar tu traducción con la sugerencia automática
 - ✅ **Guardado Automático**: Tu progreso se guarda automáticamente en el navegador (localStorage)
@@ -149,7 +149,10 @@ Attributes_AR = {
 ## 🔧 Características Técnicas
 
 - **Framework**: Vue.js 3
-- **API de Traducción**: MyMemory Translation API (gratuita, sin límites)
+- **API de Traducción**: MyMemory Translation API (gratuita con límites de uso)
+  - Límite aproximado: 5000 caracteres por día
+  - Rate limit: requests por hora (variable)
+  - Manejo automático de errores 429 (Too Many Requests)
 - **Persistencia**: LocalStorage del navegador para guardado automático
 - **Formato de Salida**: 
   - Sangría de 4 espacios
@@ -204,9 +207,11 @@ Attributes_AR = {
 2. **Usa el mismo navegador**: El progreso se guarda en el navegador que estás usando, así que usa siempre el mismo
 3. **No limpies el caché**: Si limpias los datos del navegador, perderás el progreso guardado
 4. **Descarga periódicamente**: Aunque hay guardado automático, es buena idea descargar el progreso cada cierto tiempo por seguridad
-5. **Revisa las sugerencias**: La traducción automática es buena, pero siempre revisa el contexto del juego
-6. **Mantén consistencia**: Si traduces varios archivos, usa el mismo dialecto (ES o AR)
-7. **Edita cuando sea necesario**: Las sugerencias son un punto de partida, ajústalas al contexto del juego
+5. **Trabaja en sesiones cortas**: Para evitar alcanzar el límite de la API, considera traducir en bloques de 50-100 entradas
+6. **Ten paciencia con los límites**: Si alcanzas el límite de la API, puedes continuar manualmente o esperar unos minutos
+7. **Revisa las sugerencias**: La traducción automática es buena, pero siempre revisa el contexto del juego
+8. **Mantén consistencia**: Si traduces varios archivos, usa el mismo dialecto (ES o AR)
+9. **Edita cuando sea necesario**: Las sugerencias son un punto de partida, ajústalas al contexto del juego
 
 ## ❓ Preguntas Frecuentes (FAQ)
 
@@ -240,17 +245,24 @@ Cuando completas una traducción o eliges "Empezar de Nuevo", el progreso se bor
 ### ¿Funciona en móvil?
 Sí, funciona en navegadores móviles, aunque la experiencia es mejor en desktop debido al tamaño de pantalla.
 
-### ¿Qué hago si la traducción no aparece automáticamente?
-Si el campo de traducción está vacío, aparecerá un botón "🔄 Generar Sugerencia" debajo del textarea. Haz click en él para generar manualmente la traducción. Esto puede ocurrir por problemas de conexión o si la API tarda en responder.
+### ¿Qué hago si aparece "Límite de API Alcanzado"?
+Esto significa que se alcanzó el límite de uso gratuito de MyMemory. Puedes:
+1. Continuar traduciendo manualmente (el texto está disponible en inglés)
+2. Esperar 5-10 minutos y recargar la página
+3. Descargar tu progreso y continuar más tarde
+El guardado automático preservará tu trabajo.
+
+### ¿Hay límite de traducciones por día?
+La API gratuita de MyMemory tiene límites de uso (aproximadamente 5000 caracteres por día). Si alcanzas el límite, puedes continuar manualmente o esperar hasta el día siguiente. Tu progreso se guarda automáticamente.
 
 ## 🐛 Solución de Problemas
 
 ### La traducción no aparece en el campo de texto
+- **Límite de API alcanzado**: MyMemory tiene un límite de uso gratuito. Si ves el mensaje "⏱️ Límite de API Alcanzado", espera unos minutos (usualmente 5-10 minutos) antes de continuar
+- **Solución temporal**: Puedes continuar traduciendo manualmente mientras esperas. Tu progreso se guarda automáticamente
 - Verifica que el archivo EN esté correctamente formateado
 - Asegúrate de tener conexión a internet (necesaria para las sugerencias)
-- Abre la consola del navegador (F12) para ver si hay errores
-- **Usa el botón "🔄 Generar Sugerencia"** que aparece debajo del campo de traducción cuando está vacío
-- Si sigue sin aparecer, intenta recargar la página
+- Abre la consola del navegador (F12) para ver si hay errores adicionales
 
 ### El archivo descargado tiene un nombre incorrecto (ejemplo: "_ES.txt")
 - Asegúrate de que el archivo EN comience con `NombreArchivo_EN = {`
@@ -289,6 +301,16 @@ Si el campo de traducción está vacío, aparecerá un botón "🔄 Generar Suge
 - Siempre revisa y edita las traducciones según el contexto del juego
 - Puedes escribir tu propia traducción desde cero si la sugerencia no es adecuada
 
+### Límite de uso de la API alcanzado
+- **Qué significa**: MyMemory API tiene límites de uso gratuito (generalmente 5000 caracteres por día o límite por hora)
+- **Cuánto esperar**: Usualmente 5-10 minutos para límites por hora, o hasta el día siguiente para límites diarios
+- **Qué hacer**:
+  1. Continúa traduciendo manualmente (tu progreso se guarda)
+  2. Descarga tu progreso actual con "💾 Descargar Progreso"
+  3. Espera el tiempo indicado en el mensaje
+  4. Vuelve más tarde y carga tu progreso guardado
+- **Prevención**: Si tienes muchas entradas, considera trabajar en sesiones más cortas
+
 ## 📄 Licencia
 
 MIT License - Libre de usar, modificar y distribuir.
@@ -326,9 +348,10 @@ Si encuentras algún bug o tienes sugerencias, por favor abre un [Issue](https:/
 ## 📋 Changelog
 
 ### Versión 1.0.1 (Enero 2025)
-- ✨ Agregado botón "🔄 Generar Sugerencia" para regenerar traducciones manualmente
-- 🐛 Mejorado manejo de errores cuando la sugerencia automática no carga
-- 📝 Documentación actualizada con soluciones para campos vacíos
+- ✨ Agregada detección de límite de uso de API (Error 429)
+- ✨ Mensajes informativos cuando se alcanza el límite de MyMemory API
+- 🐛 Mejorado manejo de errores con información sobre tiempo de espera
+- 📝 Documentación actualizada con soluciones para límites de API
 
 ### Versión 1.0.0 (Diciembre 2024)
 - ✅ Traducción automática con MyMemory API
