@@ -355,6 +355,22 @@
             flex: 1;
             max-width: 250px;
         }
+        .btn-regenerate {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        .btn-regenerate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 87, 108, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -435,6 +451,15 @@
                             ></textarea>
                             <div v-if="suggestion && !manualEdit && !originalFileTranslation" class="info-box" style="margin-top: 10px;">
                                 💡 Se ha sugerido una traducción automática. Puedes editarla o dejarla como está.
+                            </div>
+                            <!-- Botón para regenerar sugerencia si el campo está vacío -->
+                            <div v-if="!currentTranslation.trim() && !loadingSuggestion" style="margin-top: 10px;">
+                                <button class="btn btn-regenerate" @click="regenerateSuggestion">
+                                    🔄 Generar Sugerencia
+                                </button>
+                                <p style="font-size: 13px; color: #666; margin-top: 8px; font-style: italic;">
+                                    Si no aparece ninguna traducción, haz click aquí para generar una sugerencia.
+                                </p>
                             </div>
                         </div>
                         <!-- Mostrar opciones cuando hay traducción del archivo Y sugerencia -->
@@ -666,6 +691,33 @@
                 useSuggestedTranslation() {
                     this.currentTranslation = this.suggestion;
                     this.manualEdit = false;
+                },
+                async regenerateSuggestion() {
+                    // Forzar la regeneración de la sugerencia
+                    this.loadingSuggestion = true;
+                    this.suggestion = '';
+                    this.originalFileTranslation = '';
+                    try {
+                        const textToTranslate = this.currentEntry.originalValue;
+                        const targetLang = this.targetLanguage === 'AR' ? 'es' : 'es-ES';
+                        // MyMemory Translation API - Gratuita y sin CORS
+                        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(textToTranslate)}&langpair=en|${targetLang}`;
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        if (data.responseStatus === 200 && data.responseData && data.responseData.translatedText) {
+                            // Aplicar Title Case a la traducción
+                            this.suggestion = this.toTitleCase(data.responseData.translatedText.trim());
+                            this.currentTranslation = this.suggestion;
+                            this.manualEdit = false;
+                        } else {
+                            alert('No se pudo generar una sugerencia. Por favor, intenta de nuevo o escribe la traducción manualmente.');
+                        }
+                    } catch (error) {
+                        console.error('Error al generar sugerencia:', error);
+                        alert('Error al conectar con el servicio de traducción. Verifica tu conexión a internet.');
+                    } finally {
+                        this.loadingSuggestion = false;
+                    }
                 },
                 saveToLocalStorage() {
                     // Guardar el estado completo en localStorage

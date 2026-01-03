@@ -12,6 +12,7 @@ Accede a la herramienta aquí: **[https://pangolp.github.io/pz-translation-tool/
 ## ✨ Características
 
 - ✅ **Traducción Automática**: Sugerencias automáticas usando MyMemory Translation API
+- ✅ **Regenerar Sugerencia**: Botón manual para generar traducción si no carga automáticamente
 - ✅ **Title Case Automático**: Las traducciones siempre tienen la primera letra en mayúscula
 - ✅ **Dos Dialectos**: Soporte para español de España (ES) y Argentina (AR)
 - ✅ **Comparación de Traducciones**: Si subes un archivo parcialmente traducido, podrás comparar tu traducción con la sugerencia automática
@@ -239,12 +240,17 @@ Cuando completas una traducción o eliges "Empezar de Nuevo", el progreso se bor
 ### ¿Funciona en móvil?
 Sí, funciona en navegadores móviles, aunque la experiencia es mejor en desktop debido al tamaño de pantalla.
 
+### ¿Qué hago si la traducción no aparece automáticamente?
+Si el campo de traducción está vacío, aparecerá un botón "🔄 Generar Sugerencia" debajo del textarea. Haz click en él para generar manualmente la traducción. Esto puede ocurrir por problemas de conexión o si la API tarda en responder.
+
 ## 🐛 Solución de Problemas
 
 ### La traducción no aparece en el campo de texto
 - Verifica que el archivo EN esté correctamente formateado
 - Asegúrate de tener conexión a internet (necesaria para las sugerencias)
 - Abre la consola del navegador (F12) para ver si hay errores
+- **Usa el botón "🔄 Generar Sugerencia"** que aparece debajo del campo de traducción cuando está vacío
+- Si sigue sin aparecer, intenta recargar la página
 
 ### El archivo descargado tiene un nombre incorrecto (ejemplo: "_ES.txt")
 - Asegúrate de que el archivo EN comience con `NombreArchivo_EN = {`
@@ -318,6 +324,11 @@ Si encuentras algún bug o tienes sugerencias, por favor abre un [Issue](https:/
 ⭐ Si esta herramienta te resulta útil, considera darle una estrella en GitHub!
 
 ## 📋 Changelog
+
+### Versión 1.0.1 (Enero 2025)
+- ✨ Agregado botón "🔄 Generar Sugerencia" para regenerar traducciones manualmente
+- 🐛 Mejorado manejo de errores cuando la sugerencia automática no carga
+- 📝 Documentación actualizada con soluciones para campos vacíos
 
 ### Versión 1.0.0 (Diciembre 2024)
 - ✅ Traducción automática con MyMemory API
